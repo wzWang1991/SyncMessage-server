@@ -1,0 +1,13 @@
+{
+    "name": "SyncMessage",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "start": "node server"
+    },
+    "dependencies": {
+        "mongoose": "3.8.14",
+        "websocket": "1.0.8",
+        "express" : "4.7.2"
+    }
+}
