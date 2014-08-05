@@ -1,0 +1,28 @@
+<% include header.html %>
+
+
+<div class="container">
+
+  <!-- Main component for a primary marketing message or call to action -->
+  <div class="jumbotron">
+    <h1>SyncMessage</h1>
+    <p>This is a simple project that helps you get your SMS from your Android phone even if you leave it at home. You can also send any SMS to any number.</p>
+    <p>Log in to check your phones and messages.</p>
+    <p>
+        <% if (session.user) {
+        %>
+        <a class="btn btn-lg btn-primary" href="user" role="button">User Center &raquo;</a>
+        <a class="btn btn-lg btn-danger" href="logout" role="button">Log out &raquo;</a>
+        <%
+        } else {
+        %>
+        <a class="btn btn-lg btn-primary" href="login" role="button">Log in &raquo;</a>
+        <%
+        }%>
+
+    </p>
+  </div>
+
+</div> <!-- /container -->
+
+<% include footer.html %>
