@@ -28,6 +28,9 @@ var register = function (app) {
 
     // Sending message
     app.post('/sendmsg', controller.requiredAuthentication, controller.sendmsg);
+
+    app.get('/register', controller.register);
+    app.post('/register', controller.doRegister);
 };
 module.exports = {
     register :  register

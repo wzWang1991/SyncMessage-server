@@ -3,10 +3,10 @@ var MongoDB = require('./mongo.js')
 
 exports.index = function (req, res) {
     res.render('index.html',
-    {
-        title : "SyncMessage",
-        session : req.session
-    });
+        {
+            title : "SyncMessage",
+            session : req.session
+        });
 };
 
 exports.login = function (req, res) {
@@ -105,4 +105,41 @@ exports.sendmsg = function (req, res) {
     // In fact, we need to check if this phone belongs this user.
     require('./server').sendMsg(user, phone_id, number, text);
     res.send("Success!")
-}
+};
+
+exports.register = function (req, res) {
+    res.render('register.html', {title : "Register"});
+};
+
+exports.doRegister = function (req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+    var email = req.body.email;
+    if (username == null || password == null || email == null) {
+        res.send("Please input correct username, password and email.");
+    } else {
+        MongoDB.User.findOne({username : username}, function(err, user) {
+           if (user != null) {
+               res.render('register.html',
+                   {
+                       title : "Register",
+                       error : "This username exists. Please choose another one."
+                   });
+           } else {
+               var newUser = new MongoDB.User({
+                   username: username,
+                   password: password,
+                   email: email
+               });
+               newUser.save(function (err, product) {
+                   if (err)
+                       throw err;
+                   req.session.user = username;
+                   req.session.user_id = product._id;
+                   res.redirect('/user');
+               });
+           }
+        });
+    }
+
+};

@@ -1,0 +1,29 @@
+<% include header.html %>
+<link href="css/login.css" rel="stylesheet">
+
+<div class="container">
+
+    <%
+    if (locals.error) {
+    %>
+    <div class="alert bg-danger">
+        <a class="close" data-dismiss="alert">×</a>
+        <strong>Error: </strong> <%= error %>
+    </div>
+    <%
+    }
+    %>
+
+
+    <form class="form-signin" role="form" action="register" method="post">
+        <h2 class="form-signin-heading">Registration</h2>
+        <input type="text" name="username" class="form-control" placeholder="Username" required autofocus>
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+        <input type="email" name="email" class="form-control" placeholder="Email" required>
+        <br />
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+    </form>
+
+</div> <!-- /container -->
+
+<% include footer.html %>
