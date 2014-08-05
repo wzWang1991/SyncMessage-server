@@ -17,29 +17,64 @@ var http = require('http');
 // MongoDB schema and model.
 var MongoDB = require('./mongo.js')
 
+// Express
+var express = require('express');
+var app = express();
+
+
+// Express routers
+var router_config = require('./router-config');
+router_config.register(app);
+
+
+
 /**
  * Global variables
  */
 // list of currently connected clients (users)
 var clients = [ ];
+var authorizedClients = { };
+
+var getClients = function (username) {
+    if (username in authorizedClients)
+        return authorizedClients[username];
+    else
+        return null;
+};
+
+exports.getClients = getClients;
+
+
+/**
+ * Function to send message.
+ */
+var sendMsg = function (user, phone_id, number, text) {
+    var phones = authorizedClients[user];
+    var phone = null;
+    for (var i = 0; i < phones.length; i++) {
+        if (phones[i].phone_id == phone_id) {
+            phone = phones[i];
+            break;
+        }
+    }
+    if (phone != null) {
+        var ret = {
+            req : 600,
+            number : number,
+            text : text
+        };
+        phone.connection.sendUTF(JSON.stringify(ret));
+        return true;
+    } else
+        return false;
+};
+
+exports.sendMsg = sendMsg;
 
 /**
  * HTTP server
  */
-var server = http.createServer(function (request, response) {
-    console.log((new Date()) + ' HTTP server. URL' + request.url + ' requested.');
-
-    if (request.url === '/status') {
-        response.writeHead(200, {'Content-Type': 'application/json'});
-        var responseObject = {
-            currentClients: clients.length
-        }
-        response.end(JSON.stringify(responseObject));
-    } else {
-        response.writeHead(404, {'Content-Type': 'text/plain'});
-        response.end('Sorry, unknown url');
-    }
-});
+var server = http.createServer(app);
 server.listen(webSocketsServerPort, function () {
     console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
 });
@@ -65,6 +100,7 @@ wsServer.on('request', function (request) {
     var connection = request.accept(null, request.origin);
     // we need to know client index to remove them on 'close' event
     var index = clients.push(connection) - 1;
+    var authorizedIndex;
     var userName = false;
     var phone_id = null;
     var IMEI = null;
@@ -102,6 +138,16 @@ wsServer.on('request', function (request) {
                                         var ret = {"login": 200,
                                             "username": userName};
                                         connection.sendUTF(JSON.stringify(ret));
+                                        var info = {
+                                            IMEI : IMEI,
+                                            IMSI : IMSI,
+                                            phone_id : phone_id,
+                                            connection: connection
+                                        };
+                                        if (!(userName in authorizedClients)) {
+                                            authorizedClients[userName] = [info];
+                                        } else
+                                            authorizedClients[userName].push(info);
                                         console.log((new Date()) + " Phone (IMEI: " + recvIMEI + ") belongs to " + userName + ".");
                                     }
                                 }
@@ -159,12 +205,17 @@ wsServer.on('request', function (request) {
 
     // user disconnected
     connection.on('close', function (connection) {
-        if (userName !== false) {
+        if (userName == false) {
             console.log((new Date()) + " Peer "
                 + connection.remoteAddress + " disconnected.");
             // remove user from the list of connected clients
             clients.splice(index, 1);
             // push back user's color to be reused by another user
+        } else {
+            clients.splice(index, 1);
+            authorizedClients[userName].splice(authorizedIndex, 1);
+            console.log((new Date()) + " A phone of "
+                + userName + " disconnected.");
         }
     });
 
