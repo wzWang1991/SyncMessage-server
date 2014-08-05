@@ -66,7 +66,7 @@
                                         No unread SMS.
                                     <%
                                     } else {
-                                        for (j = 0; j < unreadMsgs.length; j++) {
+                                        for (j = unreadMsgs.length - 1; j >= 0; j--) {
                                             var msg = unreadMsgs[j];
                                             var recvTime = (new Date(msg.recvTime)).toLocaleString();
                                     %>
@@ -129,7 +129,7 @@
                                 No unread SMS.
                                 <%
                                 } else {
-                                for (j = 0; j < unreadMsgs.length; j++) {
+                                for (j = unreadMsgs.length - 1; j >= 0; j--) {
                                 var msg = unreadMsgs[j];
                                 var recvTime = (new Date(msg.recvTime)).toLocaleString();
                                 %>
