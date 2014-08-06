@@ -48,6 +48,14 @@ exports.getClients = getClients;
 /**
  * Function to send message.
  */
+
+var guid = function () {
+    function S4() {
+        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+
 var sendMsg = function (user, phone_id, number, text) {
     var phones = authorizedClients[user];
     var phone = null;
@@ -58,10 +66,14 @@ var sendMsg = function (user, phone_id, number, text) {
         }
     }
     if (phone != null) {
-        var ret = {
-            req : 600,
-            number : number,
+        var sms = {
+            smsId : guid(),
+            toNumber : number,
             text : text
+        };
+        var ret = {
+            req : 500,
+            sms : sms
         };
         phone.connection.sendUTF(JSON.stringify(ret));
         return true;
