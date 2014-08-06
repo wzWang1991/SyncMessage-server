@@ -8,7 +8,7 @@
 process.title = 'node-msgol';
 
 // Port where we'll run the websocket server
-var webSocketsServerPort = 1337;
+var webSocketsServerPort = 2945;
 
 // websocket and http servers
 var webSocketServer = require('websocket').server;
@@ -112,11 +112,10 @@ wsServer.on('request', function (request) {
     // user sent some message
     connection.on('message', function (message) {
         if (message.type === 'utf8') { // accept only text
-            if (userName === false) { // first message sent by user is their name
                 var recvMsg = JSON.parse(message.utf8Data);
-                if (recvMsg.login == true) {
-                    //The phone want to login.
-                    if (recvMsg.setUser == false) {
+                switch (recvMsg.req) {
+                    case 100:
+                        // Login request.
                         var recvIMEI = recvMsg.IMEI;
                         var recvIMSI = recvMsg.IMSI;
                         console.log((new Date()) + ' Phone connected. IMEI: ' + recvIMEI
@@ -128,15 +127,21 @@ wsServer.on('request', function (request) {
                                     throw err;
                                 else {
                                     if (phone == null) {
-                                        var ret = {"login": 404};
+                                        var ret = {
+                                            "req": 0,
+                                            "ret": 201
+                                        };
                                         connection.sendUTF(JSON.stringify(ret));
                                     } else {
                                         userName = phone.user.username;
                                         phone_id = phone._id;
                                         IMEI = recvIMEI;
                                         IMSI = recvIMSI;
-                                        var ret = {"login": 200,
-                                            "username": userName};
+                                        var ret = {
+                                            "req": 0,
+                                            "ret": 200,
+                                            "username": userName
+                                        };
                                         connection.sendUTF(JSON.stringify(ret));
                                         var info = {
                                             IMEI : IMEI,
@@ -152,9 +157,11 @@ wsServer.on('request', function (request) {
                                     }
                                 }
                             });
-                    } else {
+                        break;
+                    case 101:
+                        // Set user name request.
                         //Set the user.
-                        var setUsername = recvMsg.user;
+                        var setUsername = recvMsg.username;
                         var recvIMEI = recvMsg.IMEI;
                         var recvIMSI = recvMsg.IMSI;
                         MongoDB.User.findOne({username: setUsername}, function (err, user) {
@@ -162,7 +169,10 @@ wsServer.on('request', function (request) {
                                 throw err;
                             else {
                                 if (user == null) {
-                                    var ret = {"login": 405, "setUser": 504};
+                                    var ret = {
+                                        "req": 0,
+                                        "ret": 203
+                                    };
                                     connection.sendUTF(JSON.stringify(ret));
                                 } else {
                                     var newPhone = new MongoDB.Phone({
@@ -173,33 +183,39 @@ wsServer.on('request', function (request) {
                                     newPhone.save(function (err) {
                                         if (err)
                                             throw err;
-                                        var ret = {"login": 405,
-                                            "setUser": 502};
+                                        var ret = {
+                                            "req": 0,
+                                            "ret": 202
+                                        };
                                         connection.sendUTF(JSON.stringify(ret));
                                     });
                                 }
                             }
                         });
-                    }
+                        break;
+                    case 300:
+                        if (userName != false) {
+                            var recvSms = JSON.parse(message.utf8Data).sms;
+                            var fromNumber = recvSms.fromNumber;
+                            var content = recvSms.text;
+                            var time = recvSms.time;
+                            var newMessage = new MongoDB.Message({
+                                text: content,
+                                fromNumber: fromNumber,
+                                recvTime: time,
+                                syncTime: new Date().getTime()
+                            });
+                            MongoDB.Phone.update({_id: phone_id}, {$push: {unreadMsgs: newMessage}}, function (err) {
+                                if (err)
+                                    throw err;
+                            });
+                            console.log((new Date()) + ' Received Message from '
+                                + userName + ': ' + fromNumber + " " + content);
+                        }
+                        break;
+                    default:
+                        break;
                 }
-            } else { // log and broadcast the message
-                var recvMsg = JSON.parse(message.utf8Data).msg;
-                var fromNumber = recvMsg.fromNumber;
-                var content = recvMsg.content;
-                var time = recvMsg.time;
-                var newMessage = new MongoDB.Message({
-                    text: content,
-                    fromNumber: fromNumber,
-                    recvTime: time,
-                    syncTime: new Date().getTime()
-                });
-                MongoDB.Phone.update({_id: phone_id}, {$push: {unreadMsgs: newMessage}}, function (err) {
-                    if (err)
-                        throw err;
-                });
-                console.log((new Date()) + ' Received Message from '
-                    + userName + ': ' + fromNumber + " " + content);
-            }
         }
     });
 

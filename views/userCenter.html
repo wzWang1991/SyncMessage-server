@@ -71,7 +71,7 @@
                                             var recvTime = (new Date(msg.recvTime)).toLocaleString();
                                     %>
                                         <a href="#" class="list-group-item">
-                                            <h4 class="list-group-item-heading"><%= msg.fromNumber %>(<%= recvTime %>)</h4>
+                                            <h4 class="list-group-item-heading"><%= msg.fromNumber %>(<%= recvTime %>) <button type="button" class="btn btn-default">Mark as readed</button></h4>
                                             <p class="list-group-item-text"><%= msg.text %></p>
                                         </a>
                                     <%
@@ -134,7 +134,7 @@
                                 var recvTime = (new Date(msg.recvTime)).toLocaleString();
                                 %>
                                 <a href="#" class="list-group-item">
-                                    <h4 class="list-group-item-heading"><%= msg.fromNumber %>(<%= recvTime %>)</h4>
+                                    <h4 class="list-group-item-heading"><%= msg.fromNumber %>(<%= recvTime %>) <button type="button" class="btn btn-default">Mark as readed</button></h4>
                                     <p class="list-group-item-text"><%= msg.text %></p>
                                 </a>
                                 <%
