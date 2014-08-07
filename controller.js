@@ -143,3 +143,27 @@ exports.doRegister = function (req, res) {
     }
 
 };
+
+exports.setRead = function(req, res) {
+    var phone_id = req.body.phone_id;
+    var message_id = req.body.message_id;
+    MongoDB.Phone.findOne({_id : phone_id, unreadMsgs : {$elemMatch: {_id : message_id}}}, {"unreadMsgs.$": 1}, function(err, phone) {
+        if (err)
+            throw err;
+        else {
+            var message = phone.unreadMsgs[0];
+            MongoDB.Phone.update({_id : phone_id}, {$pull : {unreadMsgs : {_id : message_id}}}, function(err) {
+                if (err)
+                    throw err;
+                else {
+                    MongoDB.Phone.update({_id: phone_id}, {$push: {readedMsgs: message}}, function (err) {
+                        if (err)
+                            throw err;
+                        else
+                            res.send("success!")
+                    });
+                }
+            });
+        }
+    })
+};

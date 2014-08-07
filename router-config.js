@@ -31,6 +31,8 @@ var register = function (app) {
 
     app.get('/register', controller.register);
     app.post('/register', controller.doRegister);
+
+    app.post('/setread', controller.setRead);
 };
 module.exports = {
     register :  register
