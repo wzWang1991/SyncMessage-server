@@ -228,6 +228,7 @@
             return false;
         });
         $('.markasreaded').click(function(e) {
+            $(e.target).attr("disabled", true);
             var message_id = $(e.target).attr('id');
             var phone_id = $(e.target).parent().parent().parent().attr('id');
             var info = {
