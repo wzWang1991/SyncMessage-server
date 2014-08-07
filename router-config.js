@@ -33,6 +33,8 @@ var register = function (app) {
     app.post('/register', controller.doRegister);
 
     app.post('/setread', controller.setRead);
+
+    app.post('/historymsg', controller.historymsg);
 };
 module.exports = {
     register :  register

@@ -167,3 +167,14 @@ exports.setRead = function(req, res) {
         }
     })
 };
+
+exports.historymsg = function(req, res) {
+    var phone_id = req.body.phone_id;
+    MongoDB.Phone.findOne({_id : phone_id}, function(err, phone){
+        if (err)
+            throw err;
+        else {
+            res.send(JSON.stringify(phone.readedMsgs));
+        }
+    });
+}

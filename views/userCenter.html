@@ -1,4 +1,26 @@
 <% include header.html %>
+<!--Modal for history message-->
+<div class="modal fade" id="history-message-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="history-messages-phone">History Messages</h4>
+            </div>
+            <div class="modal-body">
+                <div class="list-group" id="history-message-list">
+
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 
 <div class="container">
@@ -83,7 +105,7 @@
                         </div>
 
                         <button type="button" id="openSendingDialog" class="btn btn-default" data-toggle="modal" data-target="#myModal">Send SMS using this phone</button>
-                        <button type="button" class="btn btn-default">History Messages</button>
+                        <button type="button" class="btn btn-default btn-history-message" phone_id="<%= phone._id %>" data-toggle="modal" data-target="#history-message-modal">History Messages</button>
                         <button type="button" class="btn btn-default">Bind number</button>
 
                     </li>
@@ -145,7 +167,7 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-default">History Messages</button>
+                    <button type="button" class="btn btn-default btn-history-message" phone_id="<%= phone._id %>" data-toggle="modal" data-target="#history-message-modal">History Messages</button>
                     <button type="button" class="btn btn-default">Bind number</button>
 
                 </li>
@@ -220,7 +242,29 @@
                     }
             );
         });
-
+        $('.btn-history-message').click(function (e) {
+            var phone_id = $(e.target).attr('phone_id');
+            $('#history-message-list').empty().append("Loding");
+            $.post( "historymsg",
+                    {phone_id : phone_id},
+                    function(data) {
+                        // Add it to list.
+                        var lists = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var msg = data[i];
+                            lists +=  "<a class=\"list-group-item\"><h4 class=\"list-group-item-heading\">";
+                            lists += msg.fromNumber
+                            lists += " (" + (new Date(msg.recvTime)).toLocaleString() + ") ";
+                            lists += "</h4>";
+                            lists += "<p class=\"list-group-item-text\">";
+                            lists += msg.text;
+                            lists += "</p></a>";
+                        }
+                        $('#history-message-list').empty().append(lists);
+                    },
+                    "json"
+            );
+        });
     });
 </script>
 <script src="js/bootstrap.min.js"></script>
