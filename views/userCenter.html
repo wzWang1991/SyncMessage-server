@@ -239,12 +239,15 @@
                     function(data) {
                         // Make it fade out.
                         $(e.target).parent().parent().fadeOut();
+                        var unreadNumber = parseInt($(e.target).parent().parent().parent().parent().parent().siblings('.badge').text());
+                        unreadNumber--;
+                        $(e.target).parent().parent().parent().parent().parent().siblings('.badge').text(unreadNumber);
                     }
             );
         });
         $('.btn-history-message').click(function (e) {
             var phone_id = $(e.target).attr('phone_id');
-            $('#history-message-list').empty().append("Loding");
+            $('#history-message-list').empty().append("Loading...");
             $.post( "historymsg",
                     {phone_id : phone_id},
                     function(data) {

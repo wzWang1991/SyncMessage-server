@@ -151,19 +151,24 @@ exports.setRead = function(req, res) {
         if (err)
             throw err;
         else {
-            var message = phone.unreadMsgs[0];
-            MongoDB.Phone.update({_id : phone_id}, {$pull : {unreadMsgs : {_id : message_id}}}, function(err) {
-                if (err)
-                    throw err;
-                else {
-                    MongoDB.Phone.update({_id: phone_id}, {$push: {readedMsgs: message}}, function (err) {
+            if (phone != null) {
+                var message = phone.unreadMsgs[0];
+                if (message != null) {
+                    MongoDB.Phone.update({_id : phone_id}, {$pull : {unreadMsgs : {_id : message_id}}}, function(err) {
                         if (err)
                             throw err;
-                        else
-                            res.send("success!")
+                        else {
+                            MongoDB.Phone.update({_id: phone_id}, {$push: {readedMsgs: message}}, function (err) {
+                                if (err)
+                                    throw err;
+                                else
+                                    res.send("success!")
+                            });
+                        }
                     });
                 }
-            });
+            }
+
         }
     })
 };
